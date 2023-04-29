@@ -11,7 +11,7 @@ def show_message_object(error='', color='black'):
         label_error['text'] = error
         text_field['foreground'] = color
 def validate(value):
-    pattern = r'^(-?\d*[a-z]\s*[+-]?\s*){2}?$'
+    pattern = r'^(-?\d*(?:\.\d+)?[xy]\s*[+-]?\s*){2}$'
     if value == "":
         show_message_condition()
         return True
@@ -26,7 +26,7 @@ def show_message_condition(error='', color='black'):
         label_error['text'] = error
         text_entring['foreground'] = color
 def validate_condition(value):
-    pattern = r'^(-?\d*[xy]\s*[+-]?\s*){2}(<=|>=|<|>)\s*-?\d+(\.\d+)?$'
+    pattern = r'^(-?\d*(?:\.\d+)?[a-z]\s*[+-]?\s*)+(<=|>=|<|>)\s*-?\d+(\.\d+)?$'
     if value == "":
         show_message_condition()
         return True
@@ -45,6 +45,7 @@ def add_element():
         show_message_object('Please enter value', 'red');label_error.grid(row= 4, column=0)
     else :
          list_condition.insert(i, text_entring.get());i+=1;print(list_condition.get(0,i));deleting["state"]=NORMAL
+    list_condition.update()
 i=0
 #===========================fonction deleting=========================================
 def delet_element():
@@ -69,7 +70,7 @@ check_invalidate_condition= operation_field.register(on_invalid_conditio)
 #===============================PART MIN MAX======================================
 
 Min_Max = ttk.Combobox(operation_field, values=["Max Z", "Min Z"], width= 7);Min_Max.current(0);Min_Max.grid(row= 0, column= 0)
-text_field = Entry(operation_field, width= 20, validate="all", validatecommand=check_validate_object, invalidcommand=check_invalidate_object); text_field.grid(row= 0, column= 1)
+text_field = Entry(operation_field, width= 20, validate="focusout", validatecommand=check_validate_object, invalidcommand=check_invalidate_object); text_field.grid(row= 0, column= 1)
 
 #===============================PART CONDITION======================================
 
