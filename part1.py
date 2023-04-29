@@ -9,7 +9,6 @@ def drawing():
 #=====================================================
 def addO():
     if len(ox.get())==0 or len(oy.get())==0:
-        ox.show_message('Please enter a valid email', 'red')
         return
     choiseO["state"]=DISABLED
     ox["state"]=DISABLED
