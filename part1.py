@@ -35,7 +35,11 @@ def add():
     # num1 = int(oyc.get())
     # num1 = int(choiseo2.get())
     # num1 = int(e.get())
-    equal= oxc.get()+oyc.get()+choiseop2.get()+e.get()
+    c1= oxc.get()
+    c2= oyc.get()
+    if float (oyc.get())>0: 
+        c2= "+"+ oyc.get() 
+    equal= c1+c2+choiseop2.get()+e.get()
     li.insert(i, equal);i+=1
     btn1["state"]=NORMAL
     btn2["state"]=NORMAL
