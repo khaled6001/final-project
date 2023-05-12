@@ -1,13 +1,12 @@
 import re
-import time
 from tkinter import*
 from tkinter import ttk
-from tkinter import messagebox
-from graph import inter
+from graph import*
+from result import filtter
 # ==================================== definition =================================
-x, y, equal='','','';
+x, xO, y, yO, equal='','','','','';
 listValueX, listValueY, listValueE, listOfEquation=[], [], [], []
-tr, item_index=0, 0;
+tr, item_index, numCondition=0, 0, 0;
 # =================================================================================
 def get_clicked_item(event):
     global item_index
@@ -15,45 +14,59 @@ def get_clicked_item(event):
     edit["state"]=NORMAL
     item_id = event.widget.focus()
     item_index = table.index(item_id)
-    print (item_index)
     table.update()
-    # selected_item = table.selection()[-1]
-    # column1_value = table.item(selected_item)['values'][0]
-    # column2_value = table.item(selected_item)['values'][1]
-    # column3_value = table.item(selected_item)['values'][2]
-    # phrase = "{}{}{}".format(column1_value, column2_value, column3_value)
-    # text_entring.insert(0, phrase)
+    # for selected_item in table.selection():;item = table.item(selected_item);record = item['values']
+    # text_entring.insert(0, "".join(record))
+    # selected_item = table.selection()[-1]; column1_value = table.item(selected_item)['values'][0];column2_value = table.item(selected_item)['values'][1];column3_value = table.item(selected_item)['values'][2]
+    # phrase = "{}{}{}".format(column1_value, column2_value, column3_value);text_entring.insert(0, phrase)
     num_items = len(table.get_children())
     if num_items == 0: deleting["state"]=DISABLED;edit["state"]=DISABLED
 # ===============================================================
 def org(par):
-    start=0;
-    global x,y,equal,listOfEquation
+    start=0;global x,y,equal,listOfEquation
+    if par.find("x")==-1 or par.find("X")==-1:x= "0"
+    if par.find("y")==-1 or par.find("Y")==-1:y= "0"
     for i in range(len(par)):
-        if par[i]=="x" and i==0:x= "1";start = i+1;
-        elif par[i]=="x" and par[i-1]=="-" :x= "-1";start = i+1
-        elif par[i]=="x" and par[i-1]=="+" :x= "1";start = i+1
-        elif par[i]=="x" and par[i-1]=="-" :x= "-1";start = i+1
-        elif par[i]=="x":end = i;x= par[start:end];start = i+1
-        elif par[i]=="y" and i==0:y= "1";start = i+1;
-        elif par[i]=="y" and par[i-1]=="-" :y= "-1";start = i+1
-        elif par[i]=="y" and par[i-1]=="+" :y= "1";start = i+1
-        elif par[i]=="y" and par[i-1]=="-" :y= "-1";start = i+1
-        elif par[i]=="y":end = i;y= par[start:end];start = i+1
+        if (par[i]=="x" or par[i]=="X") and i==0:x= "1";start = i+1;
+        elif (par[i]=="x" or par[i]=="X") and par[i-1]=="-" :x= "-1";start = i+1
+        elif (par[i]=="x" or par[i]=="X") and par[i-1]=="+" :x= "1";start = i+1
+        elif (par[i]=="x" or par[i]=="X") and par[i-1]=="-" :x= "-1";start = i+1
+        elif (par[i]=="x" or par[i]=="X"):end = i;x= par[start:end];start = i+1
+        elif (par[i]=="y" or par[i]=="Y") and i==0:y= "1";start = i+1;
+        elif (par[i]=="y" or par[i]=="Y") and par[i-1]=="-" :y= "-1";start = i+1
+        elif (par[i]=="y" or par[i]=="Y") and par[i-1]=="+" :y= "1";start = i+1
+        elif (par[i]=="y" or par[i]=="Y") and par[i-1]=="-" :y= "-1";start = i+1
+        elif (par[i]=="y" or par[i]=="Y"):end = i;y= par[start:end];start = i+1
         elif par[i]=="<" and par[i+1]=="=":end = i+2;equal=par[end:];listOfEquation.append("<=")
         elif par[i]==">" and par[i+1]=="=":end = i+2;equal=par[end:];listOfEquation.append(">=")
         elif par[i]=="<":end = i+1;equal=par[end:];listOfEquation.append("<")
         elif par[i]==">":end = i+1;equal=par[end:];listOfEquation.append(">")
+    
+def Org(par):
+    start=0;global xO,yO
+    for i in range(len(par)):
+        if (par[i]=="x" or par[i]=="X") and i==0:xO= "1";start = i+1;
+        elif (par[i]=="x" or par[i]=="X") and par[i-1]=="-" :xO= "-1";start = i+1
+        elif (par[i]=="x" or par[i]=="X") and par[i-1]=="+" :xO= "1";start = i+1
+        elif (par[i]=="x" or par[i]=="X") and par[i-1]=="-" :xO= "-1";start = i+1
+        elif (par[i]=="x" or par[i]=="X"):end = i;xO= par[start:end];start = i+1
+        elif (par[i]=="y" or par[i]=="Y") and i==0:yO= "1";start = i+1;
+        elif (par[i]=="y" or par[i]=="Y") and par[i-1]=="-" :yO= "-1";start = i+1
+        elif (par[i]=="y" or par[i]=="Y") and par[i-1]=="+" :yO= "1";start = i+1
+        elif (par[i]=="y" or par[i]=="Y") and par[i-1]=="-" :yO= "-1";start = i+1
+        elif (par[i]=="y" or par[i]=="Y"):end = i;yO= par[start:end];start = i+1
+    X = float(xO);Y = float(yO)
+    return X, Y
 #=====================================================
 windows = Tk();windows.title("Programme Linier Graphic");windows.geometry("450x350+200+200");windows.resizable(False, False)
 #===========================fonction limit======================================
 def limNumForO(val):
     show_message_object()
-    if len(val)<20:return True
+    if len(val)<25:return True
     else:show_message_object("Sorry, you reach the numbers limit allow", "red");return False
 def limNumForC(val):
     show_message_condition()
-    if len(val)<20:return True
+    if len(val)<25:return True
     else:show_message_condition("Sorry, you reach the numbers limit allow", "red"); return False
 #===========================fonction object======================================
 def show_message_object(error='', color='black'):   label_error_object['text'] = error;text_field['foreground'] = color; 
@@ -70,26 +83,26 @@ def add_object():
     else :addObject["state"]=DISABLED;text_field["state"]=DISABLED;deletingObject["state"]=NORMAL
 # ====================add con=============
 def add_element():
-    show_message_condition();global tr
+    show_message_condition();global tr, numCondition
     pattern =  r"(^-?\d*\.?\d*[xy])?([+-]?\d*\.?\d*[xy])?[<>]=?-?\d*\.?\d*"
     if text_entring.get()=="":show_message_condition("Value is required", 'red')
     elif tr==3: show_message_condition('Please enter value at the next form : ax+by>3', 'red'); tr=0
     elif re.fullmatch(pattern, text_entring.get()) is None:show_message_condition('invalid value', 'red'); tr+=1
+    elif numCondition==26:show_message_condition("sorry but there is lot condition", "red")
     else :
         global x, y, equal
-        show_message_condition();
-        org(text_entring.get())
-        table.insert('',END, values=(x, y, equal));
+        show_message_condition();org(text_entring.get())
+        table.insert('',END, values=(x, y, equal));text_entring.delete(0, END);numCondition+=1
         listValueX.append(x); listValueY.append(y); listValueE.append(equal)
-        text_entring.delete(0, END)
 #===========================fonction editing ======================================
 # ==================edit obj===============
 def editbject():addObject["state"]=NORMAL; text_field["state"]=NORMAL
 # ====================edit con=============
 def editCondition():
-    selected_item = table.selection()[0]
-    
-    table.item(selected_item, values=(x[item_index], y[item_index], equal[item_index]))
+    for selected_item in table.selection():
+        item = table.item(selected_item)
+        record = item['values']
+        text_entring.insert(0, "".join(record))
     
 #===========================fonction deleting=========================================
 # ==================delet obj===============
@@ -105,6 +118,9 @@ def delet_element():
 
 def drawGraph():
     inter(listValueX, listValueY, listValueE, listOfEquation)
+def calcul():
+    points = ref(); object =Org(text_field.get())
+    filtter(points, object[0], object[1])
 #==============================FRANM ONE============================================
 ttk.Label(windows, text="Linear Program", font=("italic",15)).pack(pady=10, anchor='center')
 operation_field = Frame(windows ); operation_field.pack(padx=0, pady=15, anchor='w')
@@ -136,6 +152,7 @@ table.pack(side="left", fill="both", expand=True)
 
 table.bind('<Button-1>', get_clicked_item)
 draw = Frame(windows ); draw.pack()
-ttk.Button(draw, text="draw graph", command=drawGraph).pack(side="bottom", anchor="center", pady=8)
+ttk.Button(draw, text="draw graph", command=drawGraph).pack( anchor="center", pady=8)
+ttk.Button(draw, text= "solution =>", command=calcul).pack(side="left", anchor="w", )
 #===============================END PROGRAM======================================
 windows.mainloop()
