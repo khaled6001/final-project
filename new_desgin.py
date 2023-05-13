@@ -9,16 +9,13 @@ listValueX, listValueY, listValueE, listOfEquation=[], [], [], []
 tr, item_index, numCondition=0, 0, 0;
 # =================================================================================
 def get_clicked_item(event):
+    value = []
     global item_index
     deleting["state"]=NORMAL
     edit["state"]=NORMAL
     item_id = event.widget.focus()
     item_index = table.index(item_id)
-    table.update()
-    # for selected_item in table.selection():;item = table.item(selected_item);record = item['values']
-    # text_entring.insert(0, "".join(record))
-    # selected_item = table.selection()[-1]; column1_value = table.item(selected_item)['values'][0];column2_value = table.item(selected_item)['values'][1];column3_value = table.item(selected_item)['values'][2]
-    # phrase = "{}{}{}".format(column1_value, column2_value, column3_value);text_entring.insert(0, phrase)
+    text_entring.insert(0 ,f"{listValueX[item_index]}x{listValueY[item_index]}y{listOfEquation[item_index]}{listValueE[item_index]}")    
     num_items = len(table.get_children())
     if num_items == 0: deleting["state"]=DISABLED;edit["state"]=DISABLED
 # ===============================================================
@@ -99,28 +96,33 @@ def add_element():
 def editbject():addObject["state"]=NORMAL; text_field["state"]=NORMAL
 # ====================edit con=============
 def editCondition():
-    for selected_item in table.selection():
-        item = table.item(selected_item)
-        record = item['values']
-        text_entring.insert(0, "".join(record))
-    
+    selected_item = table.focus()
+    org(text_entring)
+    table.item(selected_item, values=(x, y, equal))
+    listValueX[item_index] = x; listValueY[item_index] = y; listValueE[item_index] = equal;listOfEquation[item_index]= 
+# =here
 #===========================fonction deleting=========================================
 # ==================delet obj===============
 def delet_object(): text_field["state"]=NORMAL;text_field.delete(0, END);addObject["state"]=NORMAL
 # ====================delet con=============
 def delet_element(): 
-    select = table.selection()
-    if select is None: table.delete(table.get_children()[-1])
-    for item in select:table.delete(item);
+    table.delete(table.selection());
     num_items = len(table.get_children())
+    print(listValueX)
+    listValueX.remove(listValueX[item_index]); listValueY.remove(listValueY[item_index]); listValueE.remove(listValueE[item_index]);listOfEquation.remove(listOfEquation[item_index])
+    print(listValueX)
     if num_items == 0: deleting["state"]=DISABLED
 # ===============================draw=============================
 
 def drawGraph():
+    # if text_entring =="":show_message_condition("Value is required", 'red');return
+    if len(table.get_children()) == 0:show_message_object("Value is required", 'red');return
     inter(listValueX, listValueY, listValueE, listOfEquation)
 def calcul():
+    if text_entring =="":show_message_condition("Value is required", 'red');return
+    elif text_field.get()=="":show_message_object("Value is required", 'red');return
     points = ref(); object =Org(text_field.get())
-    filtter(points, object[0], object[1])
+    filtter(points, object[0], object[1], Min_Max.focus_get())
 #==============================FRANM ONE============================================
 ttk.Label(windows, text="Linear Program", font=("italic",15)).pack(pady=10, anchor='center')
 operation_field = Frame(windows ); operation_field.pack(padx=0, pady=15, anchor='w')
@@ -142,7 +144,7 @@ edit= Button(operation_field, text ="edit", command=editCondition, state=DISABLE
 deleting= Button(operation_field, text ="delet", command=delet_element, state=DISABLED);deleting.grid(row= 2, column= 4, padx=4)
 #==============================FRANM TWO============================================
 show_field = Frame(windows ); show_field.pack()
-table = ttk.Treeview(show_field, columns=("Value 1", "Value 2", "Value 3"), show="headings",height=5)
+table = ttk.Treeview(show_field, columns=("Value 1", "Value 2", "Value 3"), show="headings",height=5, selectmode="browse")
 table.column('Value 1', anchor=CENTER, width=110);table.column('Value 2', anchor=CENTER, width=110);table.column('Value 3', anchor=CENTER, width=110)
 table.heading("Value 1", text="x");table.heading("Value 2", text="y");table.heading("Value 3", text="part two")
 tree_scroll = ttk.Scrollbar(show_field, orient="vertical", command=table.yview)
@@ -152,7 +154,7 @@ table.pack(side="left", fill="both", expand=True)
 
 table.bind('<Button-1>', get_clicked_item)
 draw = Frame(windows ); draw.pack()
-ttk.Button(draw, text="draw graph", command=drawGraph).pack( anchor="center", pady=8)
-ttk.Button(draw, text= "solution =>", command=calcul).pack(side="left", anchor="w", )
+ttk.Button(draw, text="draw graph", command=drawGraph).pack(side= "left", anchor="center", pady=8)
+ttk.Button(draw, text= "solution =>", command=calcul).pack(side="right", anchor="w", )
 #===============================END PROGRAM======================================
 windows.mainloop()
