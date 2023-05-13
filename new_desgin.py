@@ -4,7 +4,7 @@ from tkinter import ttk
 from graph import*
 from result import filtter
 # ==================================== definition =================================
-x, xO, y, yO, equal='','','','','';
+x, xO, y, yO, equal, compare='', '', '', '', '', '';
 listValueX, listValueY, listValueE, listOfEquation=[], [], [], []
 tr, item_index, numCondition=0, 0, 0;
 # =================================================================================
@@ -20,7 +20,7 @@ def get_clicked_item(event):
     if num_items == 0: deleting["state"]=DISABLED;edit["state"]=DISABLED
 # ===============================================================
 def org(par):
-    start=0;global x,y,equal,listOfEquation
+    start=0;global x,y,equal,compare
     if par.find("x")==-1 or par.find("X")==-1:x= "0"
     if par.find("y")==-1 or par.find("Y")==-1:y= "0"
     for i in range(len(par)):
@@ -34,10 +34,10 @@ def org(par):
         elif (par[i]=="y" or par[i]=="Y") and par[i-1]=="+" :y= "1";start = i+1
         elif (par[i]=="y" or par[i]=="Y") and par[i-1]=="-" :y= "-1";start = i+1
         elif (par[i]=="y" or par[i]=="Y"):end = i;y= par[start:end];start = i+1
-        elif par[i]=="<" and par[i+1]=="=":end = i+2;equal=par[end:];listOfEquation.append("<=")
-        elif par[i]==">" and par[i+1]=="=":end = i+2;equal=par[end:];listOfEquation.append(">=")
-        elif par[i]=="<":end = i+1;equal=par[end:];listOfEquation.append("<")
-        elif par[i]==">":end = i+1;equal=par[end:];listOfEquation.append(">")
+        elif par[i]=="<" and par[i+1]=="=":end = i+2;equal=par[end:];compare ="<="
+        elif par[i]==">" and par[i+1]=="=":end = i+2;equal=par[end:];compare =">="
+        elif par[i]=="<":end = i+1;equal=par[end:];compare ="<"
+        elif par[i]==">":end = i+1;equal=par[end:];compare =">"
     
 def Org(par):
     start=0;global xO,yO
@@ -87,20 +87,18 @@ def add_element():
     elif re.fullmatch(pattern, text_entring.get()) is None:show_message_condition('invalid value', 'red'); tr+=1
     elif numCondition==26:show_message_condition("sorry but there is lot condition", "red")
     else :
-        global x, y, equal
         show_message_condition();org(text_entring.get())
         table.insert('',END, values=(x, y, equal));text_entring.delete(0, END);numCondition+=1
-        listValueX.append(x); listValueY.append(y); listValueE.append(equal)
+        listValueX.append(x); listValueY.append(y); listValueE.append(equal); listOfEquation.append(compare)
 #===========================fonction editing ======================================
 # ==================edit obj===============
 def editbject():addObject["state"]=NORMAL; text_field["state"]=NORMAL
 # ====================edit con=============
 def editCondition():
     selected_item = table.focus()
-    org(text_entring)
+    org(text_entring.get())
     table.item(selected_item, values=(x, y, equal))
-    listValueX[item_index] = x; listValueY[item_index] = y; listValueE[item_index] = equal;listOfEquation[item_index]= 
-# =here
+    listValueX[item_index] = x; listValueY[item_index] = y; listValueE[item_index] = equal;listOfEquation[item_index] = compare
 #===========================fonction deleting=========================================
 # ==================delet obj===============
 def delet_object(): text_field["state"]=NORMAL;text_field.delete(0, END);addObject["state"]=NORMAL
