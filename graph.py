@@ -4,8 +4,7 @@ import numpy as np
 import random
 alpa =list(string.ascii_uppercase)
 intersection_points, reference, editPar0, editPar1, editPar2, listInequality = [], [], [], [], [], []
-x, y, c, li, lines, =["5", "3", "6", "89", "15"], ["4", "8", "13", "56", "99"], ["3", "7", "89", "132", "65"], ["=", ">", "<", "<=", ">="], []
-# x, y, c,li=["5", "6"], ["4", "5"], ["3", "4"],["=", ">"]
+x, y, c, li, lines, =["0", "3", "6", "89", "15"], ["4", "0", "13", "56", "99"], ["3", "8", "89", "132", "65"], ["=", "=", "<", "<=", ">="], []
 # =======================================================================
 class Line:
     def __init__(self, a, b, c):self.a = a;self.b = b;self.c = c
@@ -16,13 +15,10 @@ class Line:
         y = (other_line.a * self.c - self.a * other_line.c) / determinant
         return -x, -y
 def extract_intersections(lines):
-    global intersection_points
-    intersection_points = []
-    line_count = len(lines)
+    global intersection_points;intersection_points = [];line_count = len(lines)
     for i in range(line_count):
         for j in range(i + 1, line_count):
             intersection = lines[i].intersect(lines[j])
-            
             if intersection is not None:intersection_points.append(intersection)
     return intersection_points
 def read_lines():
@@ -40,7 +36,6 @@ def real (x, y, z):
     global editPar0, editPar1,editPar2
     for i in range (len(x)):editPar0.append(float(x[i]));editPar1.append(float(y[i]));editPar2.append(float(z[i]))
 def random_hex_color():color_code = random.randint(0, 0xFFFFFF);hex_color = '#{:06x}'.format(color_code);return hex_color
-
 def inter(par0 :list, par1 :list, par2 :list, par3 :list):
     global  editPar0, editPar1, editPar2, listInequality 
     editPar0, editPar1, editPar2, listInequality = [], [], [], []
@@ -48,13 +43,13 @@ def inter(par0 :list, par1 :list, par2 :list, par3 :list):
     xMax, xMin, yMax, yMin = 0, editPar0[0], 0, editPar1[0]
     plt.figure(figsize=[10, 10])
     x, y= np.linspace(-10, 100), np.linspace(-10, 100)
-    plt.clf()  
-    plt.cla()
     for i in range(len(par0)):
-        if editPar1[i]==0:y=editPar0[i]*x
-        elif editPar0[i]==0:y=editPar1[i]*x
-        else: y = (-editPar0[i]*x+editPar2[i])/editPar1[i]
-        plt.plot(x, y, color= random_hex_color(), label=f'{editPar0[i]}x+{editPar1[i]}y {par3[i]}+{editPar2[i]}')
+            if par3[i] == "=" and editPar0[i] == 0:plt.axhline(editPar2[i] / editPar1[i], linestyle='--', color=random_hex_color(), label=f'{editPar1[i]}y {par3[i]}+{editPar2[i]}')
+            elif par3[i] == "=" and editPar1[i] == 0:plt.axvline(editPar2[i] / editPar0[i], linestyle='--', color=random_hex_color(), label=f'{editPar0[i]}x {par3[i]}+{editPar2[i]}')
+            elif editPar0[i]==0:y = editPar1[i]*x+editPar2[i];plt.plot(x, y, color= random_hex_color(), label=f'{editPar1[i]}y {par3[i]}+{editPar2[i]}')
+            elif editPar1[i]==0:y = editPar0[i]*x+editPar2[i];plt.plot(x, y, color= random_hex_color(), label=f'{editPar0[i]}x {par3[i]}+{editPar2[i]}')
+            elif par3[i]=="=":plt.plot(editPar1[i], y, color= random_hex_color(), label=f'{editPar0[i]}x+{editPar1[i]}y {par3[i]}+{editPar2[i]}')
+            else:y = (-editPar0[i]*x+editPar2[i])/editPar1[i];plt.plot(x, y, color= random_hex_color(), label=f'{editPar0[i]}x+{editPar1[i]}y {par3[i]}+{editPar2[i]}')
     main()
     plt.legend()
     plt.grid()
@@ -68,4 +63,3 @@ def inter(par0 :list, par1 :list, par2 :list, par3 :list):
 def ref ():
     return reference
 # inter (x, y, c, li)
-# ax+by=c=>y=(-ax+c)/b

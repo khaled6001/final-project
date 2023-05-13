@@ -15,6 +15,7 @@ def get_clicked_item(event):
     edit["state"]=NORMAL
     item_id = event.widget.focus()
     item_index = table.index(item_id)
+    text_entring.delete(0, END)    
     text_entring.insert(0 ,f"{listValueX[item_index]}x{listValueY[item_index]}y{listOfEquation[item_index]}{listValueE[item_index]}")    
     num_items = len(table.get_children())
     if num_items == 0: deleting["state"]=DISABLED;edit["state"]=DISABLED
@@ -34,6 +35,7 @@ def org(par):
         elif (par[i]=="y" or par[i]=="Y") and par[i-1]=="+" :y= "1";start = i+1
         elif (par[i]=="y" or par[i]=="Y") and par[i-1]=="-" :y= "-1";start = i+1
         elif (par[i]=="y" or par[i]=="Y"):end = i;y= par[start:end];start = i+1
+        elif par[i]=="=":end = i+1;equal=par[end:];compare ="="
         elif par[i]=="<" and par[i+1]=="=":end = i+2;equal=par[end:];compare ="<="
         elif par[i]==">" and par[i+1]=="=":end = i+2;equal=par[end:];compare =">="
         elif par[i]=="<":end = i+1;equal=par[end:];compare ="<"
@@ -81,7 +83,7 @@ def add_object():
 # ====================add con=============
 def add_element():
     show_message_condition();global tr, numCondition
-    pattern =  r"(^-?\d*\.?\d*[xy])?([+-]?\d*\.?\d*[xy])?[<>]=?-?\d*\.?\d*"
+    pattern =  r"(^-?\d*\.?\d*[xyXY])?([+-]?\d*\.?\d*[xyXY])?[<>=]=?-?\d*\.?\d*"
     if text_entring.get()=="":show_message_condition("Value is required", 'red')
     elif tr==3: show_message_condition('Please enter value at the next form : ax+by>3', 'red'); tr=0
     elif re.fullmatch(pattern, text_entring.get()) is None:show_message_condition('invalid value', 'red'); tr+=1
@@ -106,9 +108,7 @@ def delet_object(): text_field["state"]=NORMAL;text_field.delete(0, END);addObje
 def delet_element(): 
     table.delete(table.selection());
     num_items = len(table.get_children())
-    print(listValueX)
     listValueX.remove(listValueX[item_index]); listValueY.remove(listValueY[item_index]); listValueE.remove(listValueE[item_index]);listOfEquation.remove(listOfEquation[item_index])
-    print(listValueX)
     if num_items == 0: deleting["state"]=DISABLED
 # ===============================draw=============================
 
@@ -120,7 +120,7 @@ def calcul():
     if text_entring =="":show_message_condition("Value is required", 'red');return
     elif text_field.get()=="":show_message_object("Value is required", 'red');return
     points = ref(); object =Org(text_field.get())
-    filtter(points, object[0], object[1], Min_Max.focus_get())
+    filtter(points, object[0], object[1], Min_Max.get())
 #==============================FRANM ONE============================================
 ttk.Label(windows, text="Linear Program", font=("italic",15)).pack(pady=10, anchor='center')
 operation_field = Frame(windows ); operation_field.pack(padx=0, pady=15, anchor='w')
