@@ -4,7 +4,7 @@ import numpy as np
 import random
 alpa =list(string.ascii_uppercase)
 intersection_points, reference, editPar0, editPar1, editPar2, listInequality = [], [], [], [], [], []
-x, y, c, li, lines, =["0", "3", "6", "89", "15"], ["4", "0", "13", "56", "99"], ["3", "8", "89", "132", "65"], ["=", "=", "<", "<=", ">="], []
+x, y, c, li, lines, =["0", "3", "6", "89", "15"], ["4", "0", "13", "56", "99"], ["3", "8", "89", "132", "65"], [">", "=", "<", "<=", ">="], []
 # =======================================================================
 class Line:
     def __init__(self, a, b, c):self.a = a;self.b = b;self.c = c
@@ -27,10 +27,15 @@ def read_lines():
     return lines
 def main():
     lines = read_lines();intersection_points = extract_intersections(lines); i=0; global reference
+    reference = []
     if len(intersection_points) > 0:
         for point in intersection_points: 
-            plt.plot(point[0], point[1], "o");reference.append(point)
-            plt.annotate(alpa[i], xy=(point[0], point[1]), xytext=(1.5, 1.5), textcoords='offset points');i+=1
+            if point[0] < 0 or point[1] < 0:
+                print("No solution")
+            else:
+                print(point)
+                plt.plot(point[0], point[1], "o");reference.append(point)
+                plt.annotate(alpa[i], xy=(point[0], point[1]), xytext=(1.5, 1.5), textcoords='offset points');i+=1
 # =========================================================================
 def real (x, y, z):
     global editPar0, editPar1,editPar2
@@ -48,13 +53,13 @@ def inter(par0 :list, par1 :list, par2 :list, par3 :list):
             elif par3[i] == "=" and editPar1[i] == 0:plt.axvline(editPar2[i] / editPar0[i], linestyle='--', color=random_hex_color(), label=f'{editPar0[i]}x {par3[i]}+{editPar2[i]}')
             elif editPar0[i]==0:y = editPar1[i]*x+editPar2[i];plt.plot(x, y, color= random_hex_color(), label=f'{editPar1[i]}y {par3[i]}+{editPar2[i]}')
             elif editPar1[i]==0:y = editPar0[i]*x+editPar2[i];plt.plot(x, y, color= random_hex_color(), label=f'{editPar0[i]}x {par3[i]}+{editPar2[i]}')
-            elif par3[i]=="=":plt.plot(editPar1[i], y, color= random_hex_color(), label=f'{editPar0[i]}x+{editPar1[i]}y {par3[i]}+{editPar2[i]}')
+            elif par3[i]=="=":y = (-editPar0[i]*x+editPar2[i])/editPar1[i];plt.plot(x, y, color= random_hex_color(), label=f'{editPar0[i]}x+{editPar1[i]}y {par3[i]}+{editPar2[i]}')
             else:y = (-editPar0[i]*x+editPar2[i])/editPar1[i];plt.plot(x, y, color= random_hex_color(), label=f'{editPar0[i]}x+{editPar1[i]}y {par3[i]}+{editPar2[i]}')
     main()
     plt.legend()
     plt.grid()
-    plt.xlim(-10, 20)
-    plt.ylim(-10, 20)
+    plt.xlim(-1, 20)
+    plt.ylim(-1, 20)
     plt.xlabel('X values')
     plt.ylabel('Y values')
     plt.title('Line Graph')
@@ -63,3 +68,4 @@ def inter(par0 :list, par1 :list, par2 :list, par3 :list):
 def ref ():
     return reference
 # inter (x, y, c, li)
+ref()
