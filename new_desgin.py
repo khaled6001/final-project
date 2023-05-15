@@ -128,7 +128,8 @@ def delet_element():
 # =============================== draw & calcul =============================
 def drawGraph():
     if len(table.get_children()) == 0:show_message_condition("Pleas enter some condition", 'red');return
-    else :calcu["state"] = NORMAL;inter(listValueX, listValueY, listValueE, listOfEquation)
+    elif text_field.get() =="" or addObject["state"]==NORMAL:show_message_object("Value is required", 'red');return
+    else :xyo = Org(text_field.get());calcu["state"] = NORMAL;inter(listValueX, listValueY, listValueE, listOfEquation, xyo[0], xyo[1])
 def calcul():
     if text_field.get() =="" or addObject["state"]==NORMAL:show_message_object("Value is required", 'red');return
     elif len(table.get_children()) ==0 :show_message_condition("Pleas enter some condition", 'red');return
@@ -163,7 +164,6 @@ tree_scroll = ttk.Scrollbar(show_field, orient="vertical", command=table.yview)
 table.configure(yscrollcommand=tree_scroll.set)
 tree_scroll.pack(side="right", fill="y")
 table.pack(side="left", fill="both", expand=True)
-
 table.bind('<Double-1>', get_clicked_item)
 draw = Frame(windows ); draw.pack()
 drawer = Button(draw, text="draw graph", command=drawGraph);drawer.pack(side= "left", anchor="center", pady=8)
