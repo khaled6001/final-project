@@ -20,8 +20,7 @@ def get_clicked_item(event):
         else:text_entring.insert(0 ,f"{listValueX[item_index]}x+{listValueY[item_index]}y{listOfEquation[item_index]}{listValueE[item_index]}")    
         num_items = len(table.get_children())
         if num_items == 0: deleting["state"]=DISABLED;edit["state"]=DISABLED
-    except:
-            show_message_condition("sorry, there is some problems")
+    except:show_message_condition("sorry, there is some problems")
 # ===============================================================
 def org(par):
     start=0;global x,y,equal,compare
@@ -82,7 +81,6 @@ def show_message_object(error='', color='black'):   label_error_object['text'] =
 #===========================fonction condition======================================
 def show_message_condition(error='', color='black'):    label_error_condition['text'] = error;text_entring['foreground'] = color
 #===========================fonction adding ======================================
-# ==================add obj===============
 def add_object():
     show_message_object();global tr
     pattern = r"^(-?\d*\.?\d*[xy])?([+-]\d*\.?\d*[xy])?([+-]\d*\.?\d*[xy])?([+-]\d*\.?\d*[xy])?"
@@ -92,10 +90,9 @@ def add_object():
     else :
         try:
             xyo = Org(text_field.get());text_field.delete(0, END);text_field.insert(0, f"{xyo[0]}x+{xyo[1]}y")
-            addObject["state"]=DISABLED;text_field["state"]=DISABLED;deletingObject["state"]=NORMAL;editObject["state"]=NORMAL
+            addObject["state"]=DISABLED;text_field["state"]=DISABLED;deletingObject["state"]=NORMAL;editObject["state"]=NORMAL; reset["state"] = NORMAL
         except:
             show_message_object("sorry, there is some problems")
-# ====================add con=============
 def add_element():
     show_message_condition();global tr
     pattern =  r"(^-?\d*\.?\d*[xyXY])?([+-]?\d*\.?\d*[xyXY])?([+-]?\d*\.?\d*[xyXY])?([+-]?\d*\.?\d*[xyXY])?[<>=]=?-?\d*\.?\d*[+-]?\d*\.?\d*"
@@ -106,25 +103,28 @@ def add_element():
     else :
         try:
             show_message_condition();org(text_entring.get())
-            table.insert('',END, values=(x, y, equal));text_entring.delete(0, END);calcu["state"] = DISABLED
+            for i in range(len(table.get_children())):
+                if text_entring.get() == f"{listValueX[i]}x+{listValueY[i]}y{listOfEquation[i]}{listValueE[i]}":
+                    show_message_condition("the condition is already found", "red");return
+            table.insert('',END, values=(x, y, equal));text_entring.delete(0, END);calcu["state"] = DISABLED;reset["state"] = NORMAL
             listValueX.append(x); listValueY.append(y); listValueE.append(equal); listOfEquation.append(compare)
-        except:
-            show_message_condition("sorry, there is some problems")
+            if len(table.get_children())==2:drawer["state"] = NORMAL
+        except:show_message_condition("sorry, there is some problems", "red")
 #===========================fonction editing ======================================
-# ==================edit obj===============
 def editbject():addObject["state"]=NORMAL; text_field["state"]=NORMAL;editObject["state"]=DISABLED
-# ====================edit con=============
 def editCondition():
-    selected_item = table.focus()
-    org(text_entring.get())
-    table.item(selected_item, values=(x, y, equal))
-    listValueX[item_index] = x; listValueY[item_index] = y; listValueE[item_index] = equal;listOfEquation[item_index] = compare
+    try:
+        selected_item = table.focus();org(text_entring.get())
+        table.item(selected_item, values=(x, y, equal))
+        listValueX[item_index] = x; listValueY[item_index] = y; listValueE[item_index] = equal;listOfEquation[item_index] = compare
+    except:show_message_condition("there is no iteam selection to edit", "red"); edit["state"]=DISABLED
 #=========================== fonction deleting =========================================
 def delet_object(): text_field["state"]=NORMAL;text_field.delete(0, END);addObject["state"]=NORMAL
 def delet_element(): 
     table.delete(table.selection());num_items = len(table.get_children())
     listValueX.remove(listValueX[item_index]); listValueY.remove(listValueY[item_index]); listValueE.remove(listValueE[item_index]);listOfEquation.remove(listOfEquation[item_index])
-    if num_items == 0: deleting["state"]=DISABLED; calcu["state"] = DISABLED
+    if num_items == 0: deleting["state"] = DISABLED; calcu["state"] = DISABLED
+    elif num_items < 2 :drawer["state"] = DISABLED
 # =============================== draw & calcul =============================
 def drawGraph():
     if len(table.get_children()) == 0:show_message_condition("Pleas enter some condition", 'red');return
@@ -136,13 +136,17 @@ def calcul():
     else:
         points = ref(); object =Org(text_field.get())
         filtter(points, object[0], object[1], Min_Max.get())
+def rest ():
+    global listValueX, listValueY, listValueE, listOfEquation
+    calcu["state"] = DISABLED; addObject["state"] = NORMAL; text_field["state"] = NORMAL; drawer["state"] = DISABLED; reset["state"] = NORMAL
+    table.delete(*table.get_children());text_field.delete(0, END);text_entring.delete(0, END)
+    listValueX.clear(); listValueY.clear(); listValueE.clear(); listOfEquation.clear();
 #==============================FRANM ONE============================================
 ttk.Label(windows, text="Linear Program", font=("italic",15)).pack(pady=10, anchor='center')
 operation_field = Frame(windows ); operation_field.pack(padx=0, pady=15, anchor='w')
 label_error_object= Label(operation_field, fg= "red", font=("italic", 9));label_error_object.grid(row= 1, column=1, columnspan=4)
 label_error_condition= Label(operation_field, fg= "red", font=("italic", 9));label_error_condition.grid(row= 3, column=1, columnspan=4)
-limitNumO = operation_field.register(limNumForO), "%P"
-limitNumC = operation_field.register(limNumForC), "%P"
+limitNumO = operation_field.register(limNumForO), "%P";limitNumC = operation_field.register(limNumForC), "%P"
  #===============================PART MIN MAX=====================================
 Min_Max = ttk.Combobox(operation_field, values=["Max Z =", "Min Z ="], width= 8);Min_Max.current(0);Min_Max.grid(row= 0, column= 0)
 text_field = Entry(operation_field, width= 25, validate= "key", validatecommand= limitNumO); text_field.grid(row= 0, column= 1)
@@ -166,7 +170,8 @@ tree_scroll.pack(side="right", fill="y")
 table.pack(side="left", fill="both", expand=True)
 table.bind('<Double-1>', get_clicked_item)
 draw = Frame(windows ); draw.pack()
-drawer = Button(draw, text="draw graph", command=drawGraph);drawer.pack(side= "left", anchor="center", pady=8)
-calcu = Button(draw, text= "solution =>", command=calcul, state= "disabled");calcu.pack(side="right", anchor="w", )
+reset = Button(draw, text="Rest", command=rest, state= "disabled");reset.pack(side = "left", pady=8, padx = 5)
+drawer = Button(draw, text="Draw graph", command=drawGraph, state= "disabled");drawer.pack(side = "left", pady=8, padx = 5)
+calcu = Button(draw, text= "Solution =>", command=calcul, state= "disabled");calcu.pack(side = "left", pady=8, padx = 5)
 #===============================END PROGRAM======================================
 windows.mainloop()
