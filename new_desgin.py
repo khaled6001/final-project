@@ -66,7 +66,7 @@ def Org(par):
     yO = round(sum([float(val) for val in yCalc]), 2)
     return xO, yO
 #=====================================================
-windows = Tk();windows.title("Programme Linier Graphic");windows.geometry("450x350+200+200");windows.resizable(False, False)
+windows = Tk();windows.title("Linear Program Graphic");windows.geometry("450x350+200+200");windows.resizable(False, False); windows.iconbitmap('test.ico'); windows.iconbitmap('test.ico')
 #===========================fonction limit======================================
 def limNumForO(val):
     show_message_object()
@@ -106,8 +106,8 @@ def add_element():
             for i in range(len(table.get_children())):
                 if text_entring.get() == f"{listValueX[i]}x+{listValueY[i]}y{listOfEquation[i]}{listValueE[i]}":
                     show_message_condition("the condition is already found", "red");return
-            table.insert('',END, values=(x, y, equal));text_entring.delete(0, END);calcu["state"] = DISABLED;reset["state"] = NORMAL
-            listValueX.append(x); listValueY.append(y); listValueE.append(equal); listOfEquation.append(compare); print(listOfEquation)
+            table.insert('',END, values=(x, y, compare, equal));text_entring.delete(0, END);calcu["state"] = DISABLED;reset["state"] = NORMAL
+            listValueX.append(x); listValueY.append(y); listValueE.append(equal); listOfEquation.append(compare)
             if len(table.get_children())==2:drawer["state"] = NORMAL
         except:show_message_condition("sorry, there is some problems", "red")
 #===========================fonction editing ======================================
@@ -115,7 +115,7 @@ def editbject():addObject["state"]=NORMAL; text_field["state"]=NORMAL;editObject
 def editCondition():
     try:
         selected_item = table.focus();org(text_entring.get())
-        table.item(selected_item, values=(x, y, equal))
+        table.item(selected_item, values=(x, y, compare, equal))
         listValueX[item_index] = x; listValueY[item_index] = y; listValueE[item_index] = equal;listOfEquation[item_index] = compare
     except:show_message_condition("there is no iteam selection to edit", "red"); edit["state"]=DISABLED
 #=========================== fonction deleting =========================================
@@ -161,9 +161,9 @@ edit= Button(operation_field, text ="edit", command=editCondition, state=DISABLE
 deleting= Button(operation_field, text ="delet", command=delet_element, state=DISABLED);deleting.grid(row= 2, column= 4, padx=4)
 #==============================FRANM TWO============================================
 show_field = Frame(windows ); show_field.pack()
-table = ttk.Treeview(show_field, columns=("Value 1", "Value 2", "Value 3"), show="headings",height=5, selectmode="browse")
-table.column('Value 1', anchor=CENTER, width=110);table.column('Value 2', anchor=CENTER, width=110);table.column('Value 3', anchor=CENTER, width=110)
-table.heading("Value 1", text="x");table.heading("Value 2", text="y");table.heading("Value 3", text="part two")
+table = ttk.Treeview(show_field, columns=("Value 1", "Value 2", "Value 3", "Value 4"), show="headings",height=5, selectmode="browse")
+table.column('Value 1', anchor=CENTER, width=90);table.column('Value 2', anchor=CENTER, width=90);table.column('Value 3', anchor=CENTER, width=90);table.column('Value 4', anchor=CENTER, width=90)
+table.heading("Value 1", text="x");table.heading("Value 2", text="y");table.heading("Value 3", text="operation");table.heading("Value 4", text="part two")
 tree_scroll = ttk.Scrollbar(show_field, orient="vertical", command=table.yview)
 table.configure(yscrollcommand=tree_scroll.set)
 tree_scroll.pack(side="right", fill="y")

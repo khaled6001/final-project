@@ -28,14 +28,6 @@ def extract_intersections(lines):
             intersection = lines[i].intersect(lines[j])
             if intersection is not None:intersection_points.append(intersection)
     return intersection_points
-def divide_array_parts(array):
-    new_array = []
-    for coord in array:
-        floor_coord = tuple(math.floor(c * 100000) / 100000 for c in coord)
-        ceil_coord = tuple(math.ceil(c * 100000) / 100000 for c in coord)
-        combined_coord = (floor_coord + ceil_coord)[:2]
-        new_array.append(combined_coord)
-    return new_array
 def plot_solution_regions(constraints):
     x = np.linspace(0, 100, 5000);y = np.linspace(0, 100, 5000)
     X, Y = np.meshgrid(x, y)
@@ -49,42 +41,33 @@ def plot_solution_regions(constraints):
         elif op == '=':region = a * X + b * Y == c
         conditions &= region
     plt.imshow(conditions, origin='lower', extent=(0, 100, 0, 100), cmap='Blues', alpha=0.4)
-def find_feasible_points(constraints):
-    x = np.linspace(0, 50, 1000)
-    y = np.linspace(0, 50, 1000)
+def sol(constraints):
+    x = np.linspace(0, 100, 5000)
+    y = np.linspace(0, 100, 5000)
     X, Y = np.meshgrid(x, y)
     solution = np.ones_like(X, dtype=bool)
-    for a, b, op, c in constraints:
-        if op == '<':region_s = a * X + b * Y > c
-        elif op == '>':region_s = a * X + b * Y < c
+    for constraint in constraints:
+        a, b, op, c = constraint
+        if op == '<':region_s = a * X + b * Y < c
+        elif op == '>':region_s = a * X + b * Y > c
         elif op == '>=':region_s = a * X + b * Y >= c
         elif op == '<=':region_s = a * X + b * Y <= c
-        elif op == '=':region_s = np.isclose(a * X + b * Y, c)
+        elif op == '=':region_s = a * X + b * Y == c
         solution &= region_s
     solution_indices = np.where(solution)
-    solution_points = np.column_stack((X[solution_indices], Y[solution_indices]))
-    feasible_points = []
-    for point in solution_points:
-        x_val, y_val = point
-        satisfies_conditions = True
-        for a, b, op, c in constraints:
-            if op == '<':
-                if a * x_val + b * y_val <= c:satisfies_conditions = False; break
-            elif op == '>':
-                if a * x_val + b * y_val >= c:satisfies_conditions = False;break
-            elif op == '>=':
-                if a * x_val + b * y_val < c:satisfies_conditions = False;break
-            elif op == '<=':
-                if a * x_val + b * y_val > c:satisfies_conditions = False;break
-            elif op == '=':
-                if not np.isclose(a * x_val + b * y_val, c):satisfies_conditions = False;break
-        if satisfies_conditions:feasible_points.append((x_val, y_val))
-    return feasible_points
+    solution_points = [X[solution_indices], Y[solution_indices]]
+    if len(solution_points[0]) == 0:
+        solution_points = []
+    rows = len(solution_points)
+    new_solution_points = []
+    for i in range(rows):
+        rounded_arr = np.round(solution_points[i], 3); new_solution_points.append(rounded_arr)
+    return new_solution_points
 def main(xo, yo, constraints):
     lines = read_lines(); intersection_points = []
     intersection_points = extract_intersections(lines)
-    intersection_points = divide_array_parts(intersection_points)
-    newSolutionPoint = find_feasible_points(constraints)
+    intersection_points = tuple(tuple(round(num, 3) for num in coord_tuple) for coord_tuple in intersection_points)
+    newSolutionPoint = sol(constraints)
     solution = set()
     for tuple_val in intersection_points:
         for list_val in newSolutionPoint:
@@ -138,7 +121,6 @@ def inter(par0 :list, par1 :list, par2 :list, par3 :list, xo, yo):
         if (par3[i] == "=" or par3[i] == "<" or par3[i] == ">" or par3[i] == ">=" or par3[i] == "<=") and editPar0[i] == 0:plt.axhline(editPar2[i] / editPar1[i], linestyle='--', color=random_hex_color(), label=f'{editPar1[i]}y {par3[i]}+{editPar2[i]}');constraint.append((editPar0[i], editPar1[i], par3[i], editPar2[i]))
         elif (par3[i] == "=" or par3[i] == "<" or par3[i] == ">" or par3[i] == ">=" or par3[i] == "<=") and editPar1[i] == 0:plt.axvline(editPar2[i] / editPar0[i], linestyle='--', color=random_hex_color(), label=f'{editPar0[i]}x {par3[i]}+{editPar2[i]}');constraint.append((editPar0[i], editPar1[i], par3[i], editPar2[i]))
         else:y = (-editPar0[i]*x+editPar2[i])/editPar1[i];plt.plot(x, y, color= random_hex_color(), label=f'{editPar0[i]}x+{editPar1[i]}y {par3[i]}+{editPar2[i]}');constraint.append((editPar0[i], editPar1[i], par3[i], editPar2[i]))
-    print(constraint)
     main(xo, yo, constraint);plot_solution_regions(constraint);
     plt.xlim(0, 20);plt.ylim(0, 20);plt.legend();plt.grid()
     plt.xlabel('X values');plt.ylabel('Y values');plt.show()
