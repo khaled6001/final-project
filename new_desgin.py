@@ -24,7 +24,7 @@ def get_clicked_item(event):
 # ===============================================================
 def org(par):
     start=0;global x,y,equal,compare
-    xCalc, yCalc, eCalc = [], [], []
+    xCalc, yCalc = [], []
     if par.find("x")==-1 or par.find("X")==-1:x= "0"
     if par.find("y")==-1 or par.find("Y")==-1:y= "0"
     for i in range(len(par)):
@@ -38,11 +38,11 @@ def org(par):
         elif (par[i]=="y" or par[i]=="Y") and par[i-1]=="+" :yCalc.append("1");start = i+1
         elif (par[i]=="y" or par[i]=="Y") and par[i-1]=="-" :yCalc.append("-1");start = i+1
         elif (par[i]=="y" or par[i]=="Y"):end = i;yCalc.append(par[start:end]);start = i+1
-        elif par[i]=="=":end = i+1;equal=par[end:];compare ="="
-        elif par[i]=="<" and par[i+1]=="=":end = i+2;equal=par[end:];compare ="<="
-        elif par[i]==">" and par[i+1]=="=":end = i+2;equal=par[end:];compare =">="
-        elif par[i]=="<":end = i+1;equal=par[end:];compare ="<"
-        elif par[i]==">":end = i+1;equal=par[end:];compare =">"
+        elif par[i]=="=":end = i+1;equal=par[end:];compare ="=";break
+        elif par[i]=="<" and par[i+1]=="=":end = i+2;equal=par[end:];compare ="<=";break
+        elif par[i]==">" and par[i+1]=="=":end = i+2;equal=par[end:];compare =">=";break
+        elif par[i]=="<":end = i+1;equal=par[end:];compare ="<";break
+        elif par[i]==">":end = i+1;equal=par[end:];compare =">";break
     x = round(sum([float(val) for val in xCalc]), 2) 
     y = round(sum([float(val) for val in yCalc]), 2)
     equal =eval(equal) 
@@ -107,7 +107,7 @@ def add_element():
                 if text_entring.get() == f"{listValueX[i]}x+{listValueY[i]}y{listOfEquation[i]}{listValueE[i]}":
                     show_message_condition("the condition is already found", "red");return
             table.insert('',END, values=(x, y, equal));text_entring.delete(0, END);calcu["state"] = DISABLED;reset["state"] = NORMAL
-            listValueX.append(x); listValueY.append(y); listValueE.append(equal); listOfEquation.append(compare)
+            listValueX.append(x); listValueY.append(y); listValueE.append(equal); listOfEquation.append(compare); print(listOfEquation)
             if len(table.get_children())==2:drawer["state"] = NORMAL
         except:show_message_condition("sorry, there is some problems", "red")
 #===========================fonction editing ======================================

@@ -1,102 +1,146 @@
+import math
 import string
 import matplotlib.pyplot as plt
 import numpy as np
 import random
-
 alpa =list(string.ascii_uppercase)
-intersection_points, reference, editPar0, editPar1, editPar2, listInequality, conditions, condition= [], [], [], [], [], [], [], []
-x, y, c, li, lines, =["0", "3", "6", "89", "15"], ["4", "0", "13", "46", "25"], ["3", "8", "54", "142", "76"], [">", "<", "<", "<=", ">="], []
+intersection_points, reference, editPar0, editPar1, editPar2, conditions, condition, solution_points, xList, yList= [], [], [], [], [], [], [], [], [],[]
+x, y, c, li, lines, =["0", "3", "6", "89", "15"], ["4", "0", "13", "46", "25"], ["3", "8", "54", "142", "76"], [">", ">=", "<", ">", ">="], []
+# x, y, c, li, lines, =["5", "1"], ["0", "7"], ["0", "1"], ["<=", "<"], []
 # =======================================================================
 class Line:
-    def __init__(self, a, b, c):self.a = a;self.b = b;self.c = c
+    def __init__(self, a, b, c):
+        self.a = a;self.b = b;self.c = c
     def intersect(self, other_line):
         determinant = self.a * other_line.b - other_line.a * self.b
         if determinant == 0:return None
         x = (self.b * other_line.c - other_line.b * self.c) / determinant
         y = (other_line.a * self.c - self.a * other_line.c) / determinant
         return -x, -y
+def read_lines():
+    lines = [];global editPar0, editPar1,editPar2
+    for i in range (len(editPar0)):line = Line(editPar0[i], editPar1[i], editPar2[i]);lines.append(line)
+    return lines
 def extract_intersections(lines):
-    global intersection_points;intersection_points = [];line_count = len(lines)
+    intersection_points = [];line_count = len(lines)
     for i in range(line_count):
         for j in range(i + 1, line_count):
             intersection = lines[i].intersect(lines[j])
             if intersection is not None:intersection_points.append(intersection)
     return intersection_points
-def read_lines():
-    lines = [];global editPar0, editPar1,editPar2
-    for i in range (len(editPar0)):line = Line(editPar0[i], editPar1[i], editPar2[i]);lines.append(line)
-    return lines
-def main(xo, yo):
-    lines = read_lines();intersection_points = extract_intersections(lines); i=0; global reference
-    reference = []; optimal =0;xmax= 0;ymax = 0
-    if len(intersection_points) > 0:
-        for point in intersection_points: 
-            if (point[0] < 0 or point[1] < 0) or (point[0] == 0 and point[1] == 0):continue
-            else:
-                val = xo*point[0] + yo*point[1]
-                if val >= optimal:optimal =val;xmax= point[0];ymax = point[1]
-                plt.plot(point[0], point[1], "o");reference.append(point);plt.annotate(alpa[i], xy=(point[0], point[1]), xytext=(1.5, 1.5), textcoords='offset points');i+=1
-    plt.annotate("obtimal solution", xy=(xmax+0.2, ymax+0.2), xytext=(50, 50), arrowprops=dict(arrowstyle='->'), textcoords='offset points')
-# =========================================================================
-# # def plot_solution_regions(constraints):
-#     global conditions ;xc = np.linspace(-2, 100);yc = np.linspace(-2, 100);X, Y = np.meshgrid(xc, yc); points = ref()
-#     conditions, condition, solution= [], [], []
-#     i=0; xList, yList =[], []
-#     for i in points:
-#         xList.append(i[0])
-#         yList.append(i[1])
-    
-#     for constraint in constraints:
-#         a, b, op, c = constraint
-#         lhs = a * X + b * Y
-#         if op == '<':region = lhs < c
-#         elif op == '>':region = lhs > c
-#         elif op == '>=':region = lhs >= c
-#         elif op == '<=':region = lhs <= c
-#         elif op == '=': region = lhs == c
-#         condition.append(region)
-#         for i in range (len (xList)):
-#             try:
-#                 lhs0 = a * xList[i] + b * yList[1]
-#                 if op == '<':region_s = lhs0 < c
-#                 elif op == '>':region_s = lhs0 > c
-#                 elif op == '>=':region_s = lhs0 >= c
-#                 elif op == '<=':region_s = lhs0 <= c
-#                 elif op == '=':region_s = lhs0 == c
-#                 solution.append(region_s)
-#             except:
-#                 print(type(a))
-#     solution_point = np.all(solution, axis=0).astype(float)
-#     conditions = np.all(condition, axis=0).astype(float)
-#     solution_indices = np.where(solution_point)[0]
-#     non_solution_indices = np.where(np.logical_not(solution_point))[0]
-#     solution_points = list(zip(xList[solution_point], yList[solution_point]))
-#     non_solution_points = list(zip(xList[~solution_point], yList[~solution_point]))
-
-    # print(f"The points {solution_points} are solutions.")
-    # print(f"The points {non_solution_points} are not solutions.")
-    # plt.imshow(conditions, extent=(-2, 100, -2, 100), origin="lower", cmap="Greys", alpha = 0.3)
+def divide_array_parts(array):
+    new_array = []
+    for coord in array:
+        floor_coord = tuple(math.floor(c * 100000) / 100000 for c in coord)
+        ceil_coord = tuple(math.ceil(c * 100000) / 100000 for c in coord)
+        combined_coord = (floor_coord + ceil_coord)[:2]
+        new_array.append(combined_coord)
+    return new_array
+def plot_solution_regions(constraints):
+    x = np.linspace(0, 100, 5000);y = np.linspace(0, 100, 5000)
+    X, Y = np.meshgrid(x, y)
+    conditions = np.ones_like(X, dtype=bool)
+    for constraint in constraints:
+        a, b, op, c = constraint
+        if op == '<':region = a * X + b * Y < c
+        elif op == '>':region = a * X + b * Y > c
+        elif op == '>=':region = a * X + b * Y >= c
+        elif op == '<=':region = a * X + b * Y <= c
+        elif op == '=':region = a * X + b * Y == c
+        conditions &= region
+    plt.imshow(conditions, origin='lower', extent=(0, 100, 0, 100), cmap='Blues', alpha=0.4)
+def find_feasible_points(constraints):
+    x = np.linspace(0, 50, 1000)
+    y = np.linspace(0, 50, 1000)
+    X, Y = np.meshgrid(x, y)
+    solution = np.ones_like(X, dtype=bool)
+    for a, b, op, c in constraints:
+        if op == '<':region_s = a * X + b * Y > c
+        elif op == '>':region_s = a * X + b * Y < c
+        elif op == '>=':region_s = a * X + b * Y >= c
+        elif op == '<=':region_s = a * X + b * Y <= c
+        elif op == '=':region_s = np.isclose(a * X + b * Y, c)
+        solution &= region_s
+    solution_indices = np.where(solution)
+    solution_points = np.column_stack((X[solution_indices], Y[solution_indices]))
+    feasible_points = []
+    for point in solution_points:
+        x_val, y_val = point
+        satisfies_conditions = True
+        for a, b, op, c in constraints:
+            if op == '<':
+                if a * x_val + b * y_val <= c:satisfies_conditions = False; break
+            elif op == '>':
+                if a * x_val + b * y_val >= c:satisfies_conditions = False;break
+            elif op == '>=':
+                if a * x_val + b * y_val < c:satisfies_conditions = False;break
+            elif op == '<=':
+                if a * x_val + b * y_val > c:satisfies_conditions = False;break
+            elif op == '=':
+                if not np.isclose(a * x_val + b * y_val, c):satisfies_conditions = False;break
+        if satisfies_conditions:feasible_points.append((x_val, y_val))
+    return feasible_points
+def main(xo, yo, constraints):
+    lines = read_lines(); intersection_points = []
+    intersection_points = extract_intersections(lines)
+    intersection_points = divide_array_parts(intersection_points)
+    newSolutionPoint = find_feasible_points(constraints)
+    solution = set()
+    for tuple_val in intersection_points:
+        for list_val in newSolutionPoint:
+            if tuple_val[0] in list_val or tuple_val[1] in list_val:solution.add(tuple_val)
+    i = 0; j = 0; optimal = 0; xmax = 0; ymax = 0
+    reference = []
+    intersection_found = False
+    if len(newSolutionPoint) > 0 :
+        if len(newSolutionPoint) > 500000: 
+            plt.annotate("there is infinity solution", xy=(30, 20), xytext=(50, 50), textcoords="offset points")
+            plt.title('Linear Graph infinity solution')
+            print(True)
+            for point in solution:
+                if (point[0] < 0 or point[1] < 0) : continue
+                else:
+                    val = xo * point[0] + yo * point[1]
+                    if val >= optimal:optimal = val; xmax = point[0]; ymax = point[1]
+                    plt.plot(point[0], point[1], "o"); #print(point)
+                    reference.append(point)
+                    plt.annotate(alpa[i], xy=(point[0], point[1]), xytext=(1.5, 1.5), textcoords="offset points")
+                    i += 1; 
+                j += 1
+        else :
+            plt.title('Linear Graph')
+            for point in solution:
+                    if (point[0] < 0 or point[1] < 0) : continue
+                    else:
+                        val = xo * point[0] + yo * point[1]
+                        if val >= optimal:optimal = val; xmax = point[0]; ymax = point[1]
+                        plt.plot(point[0], point[1], "o");#  print(point)
+                        reference.append(point)
+                        plt.annotate(alpa[i], xy=(point[0], point[1]), xytext=(1.5, 1.5), textcoords="offset points")
+                        i += 1; 
+                        intersection_found = True
+                    j += 1    
+            if intersection_found:plt.annotate( "obtimal", xy=(xmax + 0.2, ymax + 0.2), xytext=(50, 50), arrowprops=dict(arrowstyle="->"), textcoords="offset points")
+    else:plt.title('Linear Graph No solution');plt.annotate("Not solution", xy=(0, 0), xytext=(50, 50), textcoords="offset points")
 # =========================================================================
 def real (x, y, z):
     global editPar0, editPar1,editPar2
     for i in range (len(x)):editPar0.append(float(x[i]));editPar1.append(float(y[i]));editPar2.append(float(z[i]))
 def random_hex_color():color_code = random.randint(0, 0xFFFFFF);hex_color = '#{:06x}'.format(color_code);return hex_color
 def inter(par0 :list, par1 :list, par2 :list, par3 :list, xo, yo):
-    global  editPar0, editPar1, editPar2, listInequality ;constraint =[]
-    editPar0, editPar1, editPar2, listInequality =  [1, 0], [0, 1], [0, 0], [];par3.insert(0, ">=");par3.insert(0, ">=")
+    global  editPar0, editPar1, editPar2 ;constraint =[]
+    editPar0, editPar1, editPar2 =  [], [], []
     real (par0, par1, par2)
-    plt.figure()
-    x, y= np.linspace(-2, 1000), np.linspace(-2, 1000)
+    x, y= np.linspace(0, 100), np.linspace(0, 100)
+    plt.axvline( 0, linestyle='-', color="black");constraint.append((1, 0, ">=", 0))
+    plt.axhline( 0, linestyle='-', color="black");constraint.append((0, 1, ">=", 0))
     for i in range(len(editPar0)):
-            if i<2:plt.axvline( 0, linestyle='-', color="black");plt.axhline( 0, linestyle='-', color="black");constraint.append((editPar0[i], editPar1[i], par3[i], editPar2[i]))
-            elif (par3[i] == "=" or par3[i] == "<" or par3[i] == ">" or par3[i] == ">=" or par3[i] == "<=") and editPar0[i] == 0:plt.axhline(editPar2[i] / editPar1[i], linestyle='--', color=random_hex_color(), label=f'{editPar1[i]}y {par3[i]}+{editPar2[i]}');constraint.append((editPar0[i], editPar1[i], par3[i], editPar2[i]))
-            elif (par3[i] == "=" or par3[i] == "<" or par3[i] == ">" or par3[i] == ">=" or par3[i] == "<=") and editPar1[i] == 0:plt.axvline(editPar2[i] / editPar0[i], linestyle='--', color=random_hex_color(), label=f'{editPar0[i]}x {par3[i]}+{editPar2[i]}');constraint.append((editPar0[i], editPar1[i], par3[i], editPar2[i]))
-            else:y = (-editPar0[i]*x+editPar2[i])/editPar1[i];plt.plot(x, y, color= random_hex_color(), label=f'{editPar0[i]}x+{editPar1[i]}y {par3[i]}+{editPar2[i]}');constraint.append((editPar0[i], editPar1[i], par3[i], editPar2[i]))
-    main(xo, yo); #plot_solution_regions(constraint)
-    plt.xlim(-1, 20);plt.ylim(-1, 20);plt.legend();plt.grid()
-    plt.xlabel('X values');plt.ylabel('Y values');plt.title('Line Graph')
-    plt.show()
+        if (par3[i] == "=" or par3[i] == "<" or par3[i] == ">" or par3[i] == ">=" or par3[i] == "<=") and editPar0[i] == 0:plt.axhline(editPar2[i] / editPar1[i], linestyle='--', color=random_hex_color(), label=f'{editPar1[i]}y {par3[i]}+{editPar2[i]}');constraint.append((editPar0[i], editPar1[i], par3[i], editPar2[i]))
+        elif (par3[i] == "=" or par3[i] == "<" or par3[i] == ">" or par3[i] == ">=" or par3[i] == "<=") and editPar1[i] == 0:plt.axvline(editPar2[i] / editPar0[i], linestyle='--', color=random_hex_color(), label=f'{editPar0[i]}x {par3[i]}+{editPar2[i]}');constraint.append((editPar0[i], editPar1[i], par3[i], editPar2[i]))
+        else:y = (-editPar0[i]*x+editPar2[i])/editPar1[i];plt.plot(x, y, color= random_hex_color(), label=f'{editPar0[i]}x+{editPar1[i]}y {par3[i]}+{editPar2[i]}');constraint.append((editPar0[i], editPar1[i], par3[i], editPar2[i]))
+    print(constraint)
+    main(xo, yo, constraint);plot_solution_regions(constraint);
+    plt.xlim(0, 20);plt.ylim(0, 20);plt.legend();plt.grid()
+    plt.xlabel('X values');plt.ylabel('Y values');plt.show()
 def ref ():return reference
 # inter (x, y, c, li, 14, 22)
-
-

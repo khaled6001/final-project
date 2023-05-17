@@ -32,7 +32,7 @@ def result(x , y, xO, yO, minMax):#
     win.mainloop()
 def filtter(inter, par0, par1, minMax):
     xList, yList = [], []
-    if len (inter[0]) !=0:
+    if len (inter) !=0:
         for i in inter:xList.append(i[0]);yList.append(i[1])
     result(xList, yList, par0, par1, minMax)
 def obtimalMax (xlast, ylast, coefX, coefY):
