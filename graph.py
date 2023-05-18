@@ -4,8 +4,7 @@ import numpy as np
 import random
 alpa =list(string.ascii_uppercase)
 reference, editPar0, editPar1, editPar2, conditions, condition, solution_points= [], [], [], [], [], [], []
-x, y, c, li, lines, =["0", "3", "6", "89", "15"], ["4", "0", "13", "46", "25"], ["3", "8", "54", "142", "76"], [">", ">=", "<", ">=", ">"], []
-# x, y, c, li, lines, =["2", "4"], ["3", "2"], ["2", "2"], ["<=", "<"], []
+infinity_solution = False
 # =======================================================================
 class Line:
     def __init__(self, a, b, c):
@@ -30,7 +29,7 @@ def extract_intersections(lines):
             if intersection is not None:intersection_points.append(intersection)
     return intersection_points
 def plot_solution_regions(constraints):
-    x = np.linspace(0, 100, 5000);y = np.linspace(0, 100, 5000)
+    x = np.linspace(0, 100, 7000);y = np.linspace(0, 100, 7000)
     X, Y = np.meshgrid(x, y)
     conditions = np.ones_like(X, dtype=bool)
     for constraint in constraints:
@@ -42,14 +41,12 @@ def plot_solution_regions(constraints):
         elif op == '=':region = a * X + b * Y == c
         conditions &= region
     plt.imshow(conditions, origin='lower', extent=(0, 100, 0, 100), cmap='Blues', alpha=0.4)
-def check_region(test, conditions):
+def check_region(points, conditions):
     solution = []
-    # print(test)
-    for point in test:
+    for point in points:
         isSol = True
         for condition in conditions:
             a, b, inequality, c  = condition
-            print (f" {a} ({point[0]})+{b} ({point[1]}){inequality} {c}")
             if inequality == '<' and not (a*point[0] + b*point[1] < c):isSol = False ; break
             elif inequality == '<=' and not (a*point[0] + b*point[1] <= c):isSol = False ; break
             elif inequality == '>' and not (a*point[0] + b*point[1] > c):isSol = False ; break
@@ -57,56 +54,53 @@ def check_region(test, conditions):
             elif inequality == '=' and not (a*point[0] + b*point[1] == c):isSol = False ; break
         if isSol:
             solution.append((point[0], point[1]))
-    print(solution)
     return solution
-def main(xo, yo, constraints):
-    lines = read_lines(); intersection_points = []
+def find_feasible_points(constraints):
+    x = np.linspace(0, 100, 7000)
+    y = np.linspace(0, 100, 7000)
+    X, Y = np.meshgrid(x, y)
+    solution = np.ones_like(X, dtype=bool)
+    for a, b, op, c in constraints:
+        if op == '<':region_s = a * X + b * Y < c
+        elif op == '>':region_s = a * X + b * Y > c
+        elif op == '>=':region_s = a * X + b * Y >= c
+        elif op == '<=':region_s = a * X + b * Y <= c
+        elif op == '=':region_s = np.isclose(a * X + b * Y, c)
+        solution &= region_s
+    solution_indices = np.where(solution)
+    solution_points = np.column_stack((X[solution_indices], Y[solution_indices]))
+    if len(solution_points) == 0:return []
+    return solution_points
+def main(constraints):
+    lines = read_lines(); intersection_points = []; global reference, infinity_solution
+    plot_solution_regions(constraints)
     intersection_points = extract_intersections(lines) ; 
-    # intersection_points = tuple(tuple(round(num, 3) for num in coord_tuple) for coord_tuple in intersection_points)
-    # print (f"========={intersection_points}===============")
     solution = check_region(intersection_points, constraints)
-    # for tuple_val in intersection_points:
-    #     for list_val in newSolutionPoint:
-    #         if tuple_val[0] in list_val or tuple_val[1] in list_val:solution.add(tuple_val)
-    i = 0; j = 0; optimal = 0; xmax = 0; ymax = 0
-    reference = []
-    intersection_found = False
-    if len(solution) > 0 :
-        if len(solution) > 500000: 
-            plt.annotate("there is infinity solution", xy=(30, 20), xytext=(50, 50), textcoords="offset points")
-            plt.title('Linear Graph infinity solution')
-            print(True)
+    region = find_feasible_points(constraints)
+    i = 0; reference = []
+    infinity_solution = False
+    if len(region) > 0 :
+        if len(region) > 100000:
+            plt.annotate("there is infinity solution", xy=(0, 0), xytext=(70, 70), textcoords="offset points")
             for point in solution:
-                if (point[0] < 0 or point[1] < 0) : continue
-                else:
-                    val = xo * point[0] + yo * point[1]
-                    if val >= optimal:optimal = val; xmax = point[0]; ymax = point[1]
-                    plt.plot(point[0], point[1], "o"); #print(point)
-                    reference.append(point)
-                    plt.annotate(alpa[i], xy=(point[0], point[1]), xytext=(1.5, 1.5), textcoords="offset points")
-                    i += 1; 
-                j += 1
+                if (point[0] == 0 and point[1] == 0):continue 
+                plt.plot(point[0], point[1], "o")
+                reference.append(point); infinity_solution = True
+                plt.annotate(alpa[i], xy=(point[0], point[1]), xytext=(1.5, 1.5), textcoords="offset points")
+                i += 1; 
         else :
-            plt.title('Linear Graph')
             for point in solution:
-                    if (point[0] < 0 or point[1] < 0) : continue
-                    else:
-                        val = xo * point[0] + yo * point[1]
-                        if val >= optimal:optimal = val; xmax = point[0]; ymax = point[1]
-                        plt.plot(point[0], point[1], "o");#  print(point)
-                        reference.append(point)
-                        plt.annotate(alpa[i], xy=(point[0], point[1]), xytext=(1.5, 1.5), textcoords="offset points")
-                        i += 1; 
-                        intersection_found = True
-                    j += 1    
-            if intersection_found:plt.annotate( "obtimal", xy=(xmax + 0.2, ymax + 0.2), xytext=(50, 50), arrowprops=dict(arrowstyle="->"), textcoords="offset points")
-    else:plt.title('Linear Graph No solution');plt.annotate("Not solution", xy=(0, 0), xytext=(50, 50), textcoords="offset points")
+                    if (point[0] == 0 and point[1] == 0):continue
+                    plt.plot(point[0], point[1], "o")
+                    reference.append(point)
+                    plt.annotate(alpa[i], xy=(point[0], point[1]), xytext=(1.5, 1.5), textcoords="offset points");i += 1; 
+    else:plt.annotate("Not solution", xy=(0, 0), xytext=(-50, -50), textcoords="offset points")
 # =========================================================================
 def real (x, y, z):
     global editPar0, editPar1,editPar2
     for i in range (len(x)):editPar0.append(float(x[i]));editPar1.append(float(y[i]));editPar2.append(float(z[i]))
 def random_hex_color():color_code = random.randint(0, 0xFFFFFF);hex_color = '#{:06x}'.format(color_code);return hex_color
-def inter(par0 :list, par1 :list, par2 :list, par3 :list, xo, yo):
+def inter(par0 :list, par1 :list, par2 :list, par3 :list):
     global  editPar0, editPar1, editPar2 ;constraint =[]
     editPar0, editPar1, editPar2 =  [], [], []
     real (par0, par1, par2)
@@ -117,8 +111,5 @@ def inter(par0 :list, par1 :list, par2 :list, par3 :list, xo, yo):
         if (par3[i] == "=" or par3[i] == "<" or par3[i] == ">" or par3[i] == ">=" or par3[i] == "<=") and editPar0[i] == 0:plt.axhline(editPar2[i] / editPar1[i], linestyle='--', color=random_hex_color(), label=f'{editPar1[i]}y {par3[i]}+{editPar2[i]}');constraint.append((editPar0[i], editPar1[i], par3[i], editPar2[i]))
         elif (par3[i] == "=" or par3[i] == "<" or par3[i] == ">" or par3[i] == ">=" or par3[i] == "<=") and editPar1[i] == 0:plt.axvline(editPar2[i] / editPar0[i], linestyle='--', color=random_hex_color(), label=f'{editPar0[i]}x {par3[i]}+{editPar2[i]}');constraint.append((editPar0[i], editPar1[i], par3[i], editPar2[i]))
         else:y = (-editPar0[i]*x+editPar2[i])/editPar1[i];plt.plot(x, y, color= random_hex_color(), label=f'{editPar0[i]}x+{editPar1[i]}y {par3[i]}+{editPar2[i]}');constraint.append((editPar0[i], editPar1[i], par3[i], editPar2[i]))
-    main(xo, yo, constraint);plot_solution_regions(constraint)
-    plt.xlim(0, 20);plt.ylim(0, 20);plt.legend();plt.grid()
-    plt.xlabel('X values');plt.ylabel('Y values');plt.show()
-def ref ():return reference
-inter (x, y, c, li, 14, 22)
+    main(constraint);plt.xlim(0, 30);plt.ylim(0, 30);plt.legend();plt.grid()
+    plt.xlabel('X values');plt.ylabel('Y values');plt.title('Linear Graph');plt.show()

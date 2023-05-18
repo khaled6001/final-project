@@ -3,7 +3,7 @@ import string
 from tkinter import*
 from tkinter import ttk
 alpa =list(string.ascii_uppercase)
-def result(x , y, xO, yO, minMax):#
+def result(x , y, xO, yO, minMax, inf):
     win = Tk();win.geometry("400x300");win.title("Results");win.resizable(False, False)
     partOne = Frame(win, height=5); partOne.pack(padx= 30, pady=20, anchor="w")
     ttk.Label(partOne, text=f"The obtimal solution :", font=("italic", 15)).grid(row=0, column=0,)#
@@ -11,6 +11,9 @@ def result(x , y, xO, yO, minMax):#
         ttk.Label(partOne, text=f"optimal solution not found", font=("italic", 14, "bold")).grid(row=1, column=0, columnspan= 2)#
         if minMax == "Max Z =":ttk.Label(partOne,  text=f"{minMax} {xO:.2f}x+{yO:.2f}y", font=("italic", 15)).grid(row=2, column=0, columnspan= 3, padx=30)
         else:ttk.Label(partOne, text=f"{minMax} {xO:.2f}x+{yO:.2f}y", font=("italic", 14, "bold")).grid(row=2, column=0, columnspan= 3, padx=30)
+    elif inf:
+        valueFinal = obtimalMax (x , y, xO, yO);ttk.Label(partOne, text=f"{minMax} {xO:.2f}x+{yO:.2f}y", font=("italic", 14)).grid(row=2, column=0, columnspan= 3, padx=30)
+        ttk.Label(partOne, text=" Obtimal solution not found ", font=("italic", 14, "bold")).grid(row=1, column=0, columnspan= 2)
     else:
         if minMax == "Max Z =":valueFinal = obtimalMax (x , y, xO, yO);ttk.Label(partOne, text=f"{minMax} {xO:.2f}({valueFinal[1]:.2f})+{yO:.2f}({valueFinal[2]:.2f})", font=("italic", 14)).grid(row=2, column=0, columnspan= 3, padx=30)
         else:valueFinal = obtimalMin (x , y, xO, yO);ttk.Label(partOne, text=f"{minMax} {xO:.2f}({valueFinal[1]:.2f})+{yO:.2f}({valueFinal[2]:.2f})", font=("italic", 14, "bold")).grid(row=2, column=0, columnspan= 3, padx=30)
@@ -30,11 +33,11 @@ def result(x , y, xO, yO, minMax):#
     tree_scroll.pack(side="right", fill="y")
     table.pack(side="left", fill="both", expand=True)
     win.mainloop()
-def filtter(inter, par0, par1, minMax):
+def filtter(inter, par0, par1, minMax, inf):
     xList, yList = [], []
     if len (inter) !=0:
         for i in inter:xList.append(i[0]);yList.append(i[1])
-    result(xList, yList, par0, par1, minMax)
+    result(xList, yList, par0, par1, minMax, inf)
 def obtimalMax (xlast, ylast, coefX, coefY):
     global solution; optimal = 0
     solution = []
@@ -49,4 +52,4 @@ def obtimalMin (xlast, ylast, coefX, coefY):
         val = coefX*xlast[i]+coefY*ylast[i]
         if val <= optimal:  optimal =val;xmin= xlast[i];ymin = ylast[i]; rank =i
     return optimal, xmin, ymin, rank
-# filtter(graph.reference, 14, 22, "Max Z =")
+filtter(graph.reference, 14, 22, "Max Z =", graph.infinity_solution)
