@@ -1,12 +1,11 @@
-import math
 import string
 import matplotlib.pyplot as plt
 import numpy as np
 import random
 alpa =list(string.ascii_uppercase)
-intersection_points, reference, editPar0, editPar1, editPar2, conditions, condition, solution_points, xList, yList= [], [], [], [], [], [], [], [], [],[]
-x, y, c, li, lines, =["0", "3", "6", "89", "15"], ["4", "0", "13", "46", "25"], ["3", "8", "54", "142", "76"], [">", ">=", "<", ">", ">="], []
-# x, y, c, li, lines, =["5", "1"], ["0", "7"], ["0", "1"], ["<=", "<"], []
+reference, editPar0, editPar1, editPar2, conditions, condition, solution_points= [], [], [], [], [], [], []
+x, y, c, li, lines, =["0", "3", "6", "89", "15"], ["4", "0", "13", "46", "25"], ["3", "8", "54", "142", "76"], [">", ">=", "<", ">=", ">"], []
+# x, y, c, li, lines, =["2", "4"], ["3", "2"], ["2", "2"], ["<=", "<"], []
 # =======================================================================
 class Line:
     def __init__(self, a, b, c):
@@ -19,6 +18,8 @@ class Line:
         return -x, -y
 def read_lines():
     lines = [];global editPar0, editPar1,editPar2
+    line = Line(1, 0, 0);lines.append(line)
+    line = Line(0, 1, 0);lines.append(line)
     for i in range (len(editPar0)):line = Line(editPar0[i], editPar1[i], editPar2[i]);lines.append(line)
     return lines
 def extract_intersections(lines):
@@ -41,42 +42,37 @@ def plot_solution_regions(constraints):
         elif op == '=':region = a * X + b * Y == c
         conditions &= region
     plt.imshow(conditions, origin='lower', extent=(0, 100, 0, 100), cmap='Blues', alpha=0.4)
-def sol(constraints):
-    x = np.linspace(0, 100, 5000)
-    y = np.linspace(0, 100, 5000)
-    X, Y = np.meshgrid(x, y)
-    solution = np.ones_like(X, dtype=bool)
-    for constraint in constraints:
-        a, b, op, c = constraint
-        if op == '<':region_s = a * X + b * Y < c
-        elif op == '>':region_s = a * X + b * Y > c
-        elif op == '>=':region_s = a * X + b * Y >= c
-        elif op == '<=':region_s = a * X + b * Y <= c
-        elif op == '=':region_s = a * X + b * Y == c
-        solution &= region_s
-    solution_indices = np.where(solution)
-    solution_points = [X[solution_indices], Y[solution_indices]]
-    if len(solution_points[0]) == 0:
-        solution_points = []
-    rows = len(solution_points)
-    new_solution_points = []
-    for i in range(rows):
-        rounded_arr = np.round(solution_points[i], 3); new_solution_points.append(rounded_arr)
-    return new_solution_points
+def check_region(test, conditions):
+    solution = []
+    # print(test)
+    for point in test:
+        isSol = True
+        for condition in conditions:
+            a, b, inequality, c  = condition
+            print (f" {a} ({point[0]})+{b} ({point[1]}){inequality} {c}")
+            if inequality == '<' and not (a*point[0] + b*point[1] < c):isSol = False ; break
+            elif inequality == '<=' and not (a*point[0] + b*point[1] <= c):isSol = False ; break
+            elif inequality == '>' and not (a*point[0] + b*point[1] > c):isSol = False ; break
+            elif inequality == '>=' and not (a*point[0] + b*point[1] >= c):isSol = False ; break
+            elif inequality == '=' and not (a*point[0] + b*point[1] == c):isSol = False ; break
+        if isSol:
+            solution.append((point[0], point[1]))
+    print(solution)
+    return solution
 def main(xo, yo, constraints):
     lines = read_lines(); intersection_points = []
-    intersection_points = extract_intersections(lines)
-    intersection_points = tuple(tuple(round(num, 3) for num in coord_tuple) for coord_tuple in intersection_points)
-    newSolutionPoint = sol(constraints)
-    solution = set()
-    for tuple_val in intersection_points:
-        for list_val in newSolutionPoint:
-            if tuple_val[0] in list_val or tuple_val[1] in list_val:solution.add(tuple_val)
+    intersection_points = extract_intersections(lines) ; 
+    # intersection_points = tuple(tuple(round(num, 3) for num in coord_tuple) for coord_tuple in intersection_points)
+    # print (f"========={intersection_points}===============")
+    solution = check_region(intersection_points, constraints)
+    # for tuple_val in intersection_points:
+    #     for list_val in newSolutionPoint:
+    #         if tuple_val[0] in list_val or tuple_val[1] in list_val:solution.add(tuple_val)
     i = 0; j = 0; optimal = 0; xmax = 0; ymax = 0
     reference = []
     intersection_found = False
-    if len(newSolutionPoint) > 0 :
-        if len(newSolutionPoint) > 500000: 
+    if len(solution) > 0 :
+        if len(solution) > 500000: 
             plt.annotate("there is infinity solution", xy=(30, 20), xytext=(50, 50), textcoords="offset points")
             plt.title('Linear Graph infinity solution')
             print(True)
@@ -121,8 +117,8 @@ def inter(par0 :list, par1 :list, par2 :list, par3 :list, xo, yo):
         if (par3[i] == "=" or par3[i] == "<" or par3[i] == ">" or par3[i] == ">=" or par3[i] == "<=") and editPar0[i] == 0:plt.axhline(editPar2[i] / editPar1[i], linestyle='--', color=random_hex_color(), label=f'{editPar1[i]}y {par3[i]}+{editPar2[i]}');constraint.append((editPar0[i], editPar1[i], par3[i], editPar2[i]))
         elif (par3[i] == "=" or par3[i] == "<" or par3[i] == ">" or par3[i] == ">=" or par3[i] == "<=") and editPar1[i] == 0:plt.axvline(editPar2[i] / editPar0[i], linestyle='--', color=random_hex_color(), label=f'{editPar0[i]}x {par3[i]}+{editPar2[i]}');constraint.append((editPar0[i], editPar1[i], par3[i], editPar2[i]))
         else:y = (-editPar0[i]*x+editPar2[i])/editPar1[i];plt.plot(x, y, color= random_hex_color(), label=f'{editPar0[i]}x+{editPar1[i]}y {par3[i]}+{editPar2[i]}');constraint.append((editPar0[i], editPar1[i], par3[i], editPar2[i]))
-    main(xo, yo, constraint);plot_solution_regions(constraint);
+    main(xo, yo, constraint);plot_solution_regions(constraint)
     plt.xlim(0, 20);plt.ylim(0, 20);plt.legend();plt.grid()
     plt.xlabel('X values');plt.ylabel('Y values');plt.show()
 def ref ():return reference
-# inter (x, y, c, li, 14, 22)
+inter (x, y, c, li, 14, 22)
