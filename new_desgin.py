@@ -182,6 +182,6 @@ table.bind('<Double-1>', get_clicked_item)
 draw = Frame(windows ); draw.pack()
 reset = Button(draw, text="Rest", command=rest, state= "disabled");reset.pack(side = "left", pady=8, padx = 5)
 drawer = Button(draw, text="Draw graph", command=drawGraph, state= "disabled");drawer.pack(side = "left", pady=8, padx = 5)
-calcu = Button(draw, text= "Solution =>", command=calcul, state= "disabled");calcu.pack(side = "left", pady=8, padx = 5)
+calcu = Button(draw, text= "Solution =>", command=calcul, state = "disabled");calcu.pack(side = "left", pady=8, padx = 5)
 #===============================END PROGRAM======================================
 windows.mainloop()
